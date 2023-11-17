@@ -1,0 +1,4 @@
+gh_daemon_state.json*
+gh_user_state.json*
+tmp.json
+/bin
