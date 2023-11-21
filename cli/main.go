@@ -174,11 +174,28 @@ func runCommandShowPr(storage storage.Storage) error {
 }
 
 func runCommandMarkOpen(storage storage.Storage) error {
-	if len(flag.Args()) < 2 {
+	fs := flag.NewFlagSet(commandMarkOpen, flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Println("" +
+			"Mark URL as opened (visited). The command returns exit code 1 if the file was visited already and the" +
+			" command was no-op. This is to facilitate chaining commands with fzf bindings.")
+		fs.PrintDefaults()
+	}
+	exitErrorIfMarked := fs.Bool("e", false, fmt.Sprintf("Exit with error code 1 if the file is already marked as opened. This is useful to conditionally chain %s and other commands.", commandMarkOpen))
+	fs.Parse(flag.Args()[1:])
+	log.Printf("Flag -e=%t", *exitErrorIfMarked)
+	if len(fs.Args()) < 1 {
 		return fmt.Errorf("expected url to mark")
 	}
-	url := flag.Args()[1]
-	return storage.MarkUrlAsOpened(url)
+	url := fs.Args()[0]
+	marked, err := storage.MarkUrlAsOpened(url)
+	if err != nil {
+		return err
+	}
+	if !marked && *exitErrorIfMarked {
+		return fmt.Errorf("URL already marked as opened, doing nothing: %s", url)
+	}
+	return nil
 }
 
 func runCommandMarkMute(storage storage.Storage) error {

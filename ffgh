@@ -21,7 +21,7 @@ fzf \
 	--preview "$bin show-pr {1}" \
 	--header-lines=1 \
 	--bind "start:reload:($bin fzf)"\
-	--bind "ctrl-r:reload($bin mark-open {1} && $bin mark-mute {1} && $bin fzf)+down" \
+	--bind "ctrl-r:reload($bin mark-open -e {1} || $bin mark-mute {1} && $bin fzf)+down" \
 	--bind "ctrl-n:execute(vim $temp &> /dev/tty && $bin add-note {1} $temp)+reload:($bin fzf)" \
 	| \
 cut -f1 | \

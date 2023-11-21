@@ -36,21 +36,27 @@ func (s *FileStorage) ResetPullRequests(prs []gh.PullRequest) error {
 	return writeAtOnce(s.PrsStatePath, marshalled)
 }
 
-func (s *FileStorage) MarkUrlAsOpened(url string) error {
+func (s *FileStorage) MarkUrlAsOpened(url string) (bool, error) {
 	log.Printf("Mark opened %s", url)
 	pr, err := s.getPrForUrl(url)
 	if err != nil {
-		return fmt.Errorf("error when marking open: %w", err)
+		return false, fmt.Errorf("error when marking open: %w", err)
 	}
 	userPrState, err := s.readUserPrState()
 	if err != nil {
-		return fmt.Errorf("error while reading user state: %w", err)
+		return false, fmt.Errorf("error while reading user state: %w", err)
 	}
 	prState := userPrState.Get(url)
-	prState.OpenedAt = &pr.UpdatedAt
-	prState.LastCommentCount = pr.CommentsCount
-	userPrState.Set(url, prState)
-	return s.writeUserPrState(userPrState)
+	if prState.OpenedAt != nil && *prState.OpenedAt == pr.UpdatedAt && prState.LastCommentCount == pr.CommentsCount {
+		log.Printf("PR state up to date, not marking it as opened")
+		return false, nil
+	} else {
+		log.Printf("PR state changed so it's marked as opened")
+		prState.OpenedAt = &pr.UpdatedAt
+		prState.LastCommentCount = pr.CommentsCount
+		userPrState.Set(url, prState)
+		return true, s.writeUserPrState(userPrState)
+	}
 }
 
 func (s *FileStorage) MarkUrlAsMuted(url string) error {
