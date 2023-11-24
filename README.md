@@ -2,19 +2,21 @@
 
 Quick access to GitHub PRs from terminal.
 
+
 ## How to use
 
-Either run sync in terminal:
+Run sync in terminal:
 
 ```bash
 ffgh-bin -v sync
+
+# or
+
+while [ 1 ] ; do  ./bin/ffgh-bin -v sync ; echo "RESTART"; sleep 1; done
 ```
 
-Or run sync from crontab every minute:
-
-```crontab
-* * * * * ffgh-bin -v sync -once
-```
+I run such session as "buried session" in iTerm (hidden in the very background). I couldn't make `crontab` work with
+`gh` client.
 
 To run the UI run `./ffgh`.
 
