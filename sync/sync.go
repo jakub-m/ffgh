@@ -80,7 +80,7 @@ func (s *Synchronizer) RunOnce(config config.Config) error {
 
 func getPrs(query, metaLabel string) ([]gh.PullRequest, error) {
 	log.Printf("Get PRs for: %s", query)
-	out, err := exec.Command("gh", "search", "prs", "--state=open", query, "--json", jsonFields).Output()
+	out, err := exec.Command("gh", "search", "prs", "--draft=false", "--state=open", query, "--json", jsonFields).Output()
 	if err != nil {
 		return nil, fmt.Errorf("error while running gh command: %s", err)
 	}
