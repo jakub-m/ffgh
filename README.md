@@ -42,13 +42,17 @@ by xbar. If the xbar shows `GH err!` it means that the state is out of sync. Che
 [ref_xbar]:https://github.com/matryer/xbar
 
 
-## conifig
+## config
 
 You can define a config with GitHub queries. Run ffzf -h to see the default config.
 
 
-# TODO
-* Configure color styles (for black and white terminal)
-* Mark as "unread" (for further reading) or mark as "read"
-* Do not show the authored new PRs as new, mark them as read automatically.
-* Show help with ctrl-?
+# Troubleshooting
+
+Q: My PRs are not visible
+
+Check if you have `gh` tool configured. See if this shows your PRs:
+
+```
+gh search prs --author=@me
+```
