@@ -25,5 +25,5 @@ fzf \
 	--bind "ctrl-n:execute(vim $temp &> /dev/tty && $bin add-note {1} $temp)+reload:($bin fzf)" \
 	| \
 cut -f1 | \
-xargs -n1 -I{} bash -c "$bin mark-open {} && open {}/files"
+xargs -n1 -I{} bash -c "$bin mark-open {} && open {}"
 
