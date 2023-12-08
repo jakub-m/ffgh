@@ -126,7 +126,7 @@ func (s *FileStorage) GetUserState() (*UserState, error) {
 }
 
 func (s *FileStorage) readUserState() (*UserState, error) {
-	state := UserState{perUrl: make(map[string]PrState)}
+	state := UserState{PerUrl: make(map[string]PrState)}
 	log.Printf("Reading %s", s.UserStatePath)
 	file, err := os.Open(s.UserStatePath)
 	if err != nil {
