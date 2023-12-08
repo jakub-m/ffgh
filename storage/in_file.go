@@ -10,20 +10,20 @@ import (
 )
 
 const (
-	defaultGitHubPrState = "gh_daemon_state.json"
-	defaultUserPrState   = "gh_user_state.json"
+	defaultGitHubState = "gh_daemon_state.json"
+	defaultUserState   = "gh_user_state.json"
 )
 
 func NewFileStorage() *FileStorage {
 	return &FileStorage{
-		PrsStatePath:    defaultGitHubPrState,
-		UserPrStatePath: defaultUserPrState,
+		PrsStatePath:  defaultGitHubState,
+		UserStatePath: defaultUserState,
 	}
 }
 
 type FileStorage struct {
-	PrsStatePath    string
-	UserPrStatePath string
+	PrsStatePath  string
+	UserStatePath string
 }
 
 var _ Storage = (*FileStorage)(nil)
@@ -42,7 +42,7 @@ func (s *FileStorage) MarkUrlAsOpened(url string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("error when marking open: %w", err)
 	}
-	userPrState, err := s.readUserPrState()
+	userPrState, err := s.readUserState()
 	if err != nil {
 		return false, fmt.Errorf("error while reading user state: %w", err)
 	}
@@ -55,14 +55,14 @@ func (s *FileStorage) MarkUrlAsOpened(url string) (bool, error) {
 		prState.OpenedAt = &pr.UpdatedAt
 		prState.LastCommentCount = pr.CommentsCount
 		userPrState.Set(url, prState)
-		return true, s.writeUserPrState(userPrState)
+		return true, s.writeUserState(userPrState)
 	}
 }
 
 func (s *FileStorage) MarkUrlAsMuted(url string) error {
 	log.Printf("Mark muted %s", url)
 	// mark as read
-	userPrState, err := s.readUserPrState()
+	userPrState, err := s.readUserState()
 	if err != nil {
 		return fmt.Errorf("error while reading user state: %w", err)
 	}
@@ -71,7 +71,7 @@ func (s *FileStorage) MarkUrlAsMuted(url string) error {
 	prState.IsMute = !prState.IsMute
 	log.Printf("Change mute state to %t %s", prState.IsMute, url)
 	userPrState.Set(url, prState)
-	return s.writeUserPrState(userPrState)
+	return s.writeUserState(userPrState)
 }
 
 func (s *FileStorage) getPrForUrl(url string) (gh.PullRequest, error) {
@@ -90,14 +90,14 @@ func (s *FileStorage) getPrForUrl(url string) (gh.PullRequest, error) {
 
 func (s *FileStorage) AddNote(url, note string) error {
 	log.Printf("Add note to url %s: %s", url, note)
-	userPrState, err := s.readUserPrState()
+	userPrState, err := s.readUserState()
 	if err != nil {
 		return fmt.Errorf("error when adding note: %w", err)
 	}
 	prState := userPrState.Get(url)
 	prState.Note = note
 	userPrState.Set(url, prState)
-	return s.writeUserPrState(userPrState)
+	return s.writeUserState(userPrState)
 }
 
 func (s *FileStorage) GetPullRequests() ([]gh.PullRequest, error) {
@@ -121,34 +121,34 @@ func (s *FileStorage) GetSyncTime() (time.Time, bool) {
 	return info.ModTime(), true
 }
 
-func (s *FileStorage) GetUserPrState() (*UserPrState, error) {
-	return s.readUserPrState()
+func (s *FileStorage) GetUserState() (*UserState, error) {
+	return s.readUserState()
 }
 
-func (s *FileStorage) readUserPrState() (*UserPrState, error) {
-	state := UserPrState{perUrl: make(map[string]PrState)}
-	log.Printf("Reading %s", s.UserPrStatePath)
-	file, err := os.Open(s.UserPrStatePath)
+func (s *FileStorage) readUserState() (*UserState, error) {
+	state := UserState{perUrl: make(map[string]PrState)}
+	log.Printf("Reading %s", s.UserStatePath)
+	file, err := os.Open(s.UserStatePath)
 	if err != nil {
-		log.Printf("Error while reading %s: %s", s.UserPrStatePath, err)
+		log.Printf("Error while reading %s: %s", s.UserStatePath, err)
 		return &state, nil
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&state); err != nil {
-		return nil, fmt.Errorf("error while unmarshalling file %s: %w", s.UserPrStatePath, err)
+		return nil, fmt.Errorf("error while unmarshalling file %s: %w", s.UserStatePath, err)
 	}
 	return &state, nil
 }
 
-func (s *FileStorage) writeUserPrState(state *UserPrState) error {
+func (s *FileStorage) writeUserState(state *UserState) error {
 	// new state if missing
 	marshalled, err := json.MarshalIndent(state, "", " ")
 	if err != nil {
 		return fmt.Errorf("error while marshalling state: %w", err)
 	}
-	return writeAtOnce(s.UserPrStatePath, marshalled)
+	return writeAtOnce(s.UserStatePath, marshalled)
 }
 
 // writeAtOnce tries to write as atomically as it can.

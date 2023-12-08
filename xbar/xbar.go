@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func FprintCompactSummary(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserPrState) {
+func FprintCompactSummary(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserState) {
 	newCount := 0
 	updatedCount := 0
 	commentedCount := 0

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type UserPrState struct {
+type UserState struct {
 	perUrl map[string]PrState
 }
 
@@ -14,14 +14,14 @@ type userPrStateJson struct {
 	PerUrl map[string]PrState
 }
 
-func (s *UserPrState) MarshalJSON() ([]byte, error) {
+func (s *UserState) MarshalJSON() ([]byte, error) {
 	q := userPrStateJson{
 		PerUrl: s.perUrl,
 	}
 	return json.Marshal(q)
 }
 
-func (s *UserPrState) UnmarshalJSON(b []byte) error {
+func (s *UserState) UnmarshalJSON(b []byte) error {
 	var q userPrStateJson
 	if err := json.Unmarshal(b, &q); err != nil {
 		return err
@@ -30,10 +30,10 @@ func (s *UserPrState) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-var _ json.Marshaler = (*UserPrState)(nil)
-var _ json.Unmarshaler = (*UserPrState)(nil)
+var _ json.Marshaler = (*UserState)(nil)
+var _ json.Unmarshaler = (*UserState)(nil)
 
-func (s *UserPrState) Get(url string) PrState {
+func (s *UserState) Get(url string) PrState {
 	if state, ok := s.perUrl[url]; ok {
 		return state
 	} else {
@@ -43,7 +43,7 @@ func (s *UserPrState) Get(url string) PrState {
 	}
 }
 
-func (s *UserPrState) Set(url string, p PrState) {
+func (s *UserState) Set(url string, p PrState) {
 	s.perUrl[url] = p
 }
 

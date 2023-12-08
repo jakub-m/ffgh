@@ -21,13 +21,14 @@ import (
 )
 
 const (
+	commandAddNote            = "add-note"
+	commandCycleView          = "cycle-view"
 	commandFzf                = "fzf"
 	commandShowCompactSummary = "show-compact-summary"
 	commandMarkOpen           = "mark-open"
 	commandMarkMute           = "mark-mute"
 	commandShowPr             = "show-pr"
 	commandSync               = "sync"
-	commandAddNote            = "add-note"
 )
 const (
 	// outOfSyncPeriod says how long do we wait for sync before considering the state out of sync.
@@ -37,6 +38,7 @@ const (
 func main() {
 	commands := []string{
 		commandAddNote,
+		commandCycleView,
 		commandFzf,
 		commandMarkMute,
 		commandMarkOpen,
@@ -90,7 +92,7 @@ func main() {
 	log.Printf("Run command: %s", command)
 	storage := storage.NewFileStorage()
 	storage.PrsStatePath = path.Join(options.statePath, storage.PrsStatePath)
-	storage.UserPrStatePath = path.Join(options.statePath, storage.UserPrStatePath)
+	storage.UserStatePath = path.Join(options.statePath, storage.UserStatePath)
 	if err := func() error {
 		if command == commandSync {
 			return runCommandSync(config, storage)
@@ -106,6 +108,8 @@ func main() {
 			return runCommandMarkMute(storage)
 		} else if command == commandAddNote {
 			return runCommandAddNote(storage)
+		} else if command == commandCycleView {
+			return runCommandCycleView(storage)
 		} else {
 			return fmt.Errorf("unknown command: %s", command)
 		}
@@ -220,12 +224,24 @@ func runCommandAddNote(storage storage.Storage) error {
 	return storage.AddNote(url, note)
 }
 
-func loadState(storage storage.Storage) ([]gh.PullRequest, *storage.UserPrState, error) {
+func runCommandCycleView(storage storage.Storage) error {
+	//s, err := storage.GetUserSettings()
+	//if err != nil {
+	//	return fmt.Errorf("error when running cycle view: %w", err)
+	//}
+	//s.ViewMode = fzf.CycleViewMode(s.ViewMode)
+	//if err = storage.SetUserSettings(s); err != nil {
+	//	return fmt.Errorf("error when running cycle view: %w", err)
+	//}
+	return nil
+}
+
+func loadState(storage storage.Storage) ([]gh.PullRequest, *storage.UserState, error) {
 	prs, err := storage.GetPullRequests()
 	if err != nil {
 		return prs, nil, err
 	}
-	userPrState, err := storage.GetUserPrState()
+	userPrState, err := storage.GetUserState()
 	if err != nil {
 		return prs, nil, err
 	}

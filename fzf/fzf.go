@@ -15,7 +15,7 @@ import (
 
 const nbsp = "\u00A0"
 
-func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserPrState, queries []config.Query) {
+func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserState, queries []config.Query) {
 	repoNameMaxLen := getMaxRepoLen(prs)
 	for _, pr := range prs {
 		prState := userPrState.Get(pr.URL)
@@ -71,7 +71,7 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userPrState *storag
 	}
 }
 
-func FprintShowPullRequest(out io.Writer, prUrl string, prs []gh.PullRequest, userPrState *storage.UserPrState) {
+func FprintShowPullRequest(out io.Writer, prUrl string, prs []gh.PullRequest, userPrState *storage.UserState) {
 	var pr *gh.PullRequest
 	for i := range prs {
 		if prs[i].URL == prUrl {
