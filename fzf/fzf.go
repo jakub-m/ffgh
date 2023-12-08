@@ -16,7 +16,36 @@ import (
 const nbsp = "\u00A0"
 
 func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, queries []config.Query) {
+	useMuted := func(prs []gh.PullRequest) []gh.PullRequest {
+		filtered := []gh.PullRequest{}
+		for _, pr := range prs {
+			if userState.GetPR(pr.URL).IsMute {
+				filtered = append(filtered, pr)
+			}
+		}
+		return filtered
+	}
+
+	useNotMuted := func(prs []gh.PullRequest) []gh.PullRequest {
+		filtered := []gh.PullRequest{}
+		for _, pr := range prs {
+			if !userState.GetPR(pr.URL).IsMute {
+				filtered = append(filtered, pr)
+			}
+		}
+		return filtered
+	}
+
+	if mode := userState.Settings.ViewMode; mode == ViewModeMuteTop {
+		newPrs := append([]gh.PullRequest{}, useNotMuted(prs)...)
+		newPrs = append(newPrs, useMuted(prs)...)
+		prs = newPrs
+
+	} else if mode == ViewModeHideMute {
+		prs = useNotMuted(prs)
+	}
 	repoNameMaxLen := getMaxRepoLen(prs)
+
 	for _, pr := range prs {
 		prState := userState.GetPR(pr.URL)
 		flagString := ""
