@@ -22,7 +22,7 @@ fzf \
 	--header-lines=1 \
 	--bind "start:reload:($bin fzf)"\
 	--bind "ctrl-r:reload($bin mark-open -e {1} || $bin mark-mute {1} && $bin fzf)+down" \
-	--bind "ctrl-v:reload($bin cycle-view)" \
+	--bind "ctrl-v:reload($bin cycle-view && $bin fzf)" \
 	--bind "ctrl-n:execute(vim $temp &> /dev/tty && $bin add-note {1} $temp)+reload:($bin fzf)" \
 	| \
 cut -f1 | \

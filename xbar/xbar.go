@@ -14,7 +14,7 @@ func FprintCompactSummary(out io.Writer, prs []gh.PullRequest, userPrState *stor
 	commentedCount := 0
 	totalCount := 0
 	for _, pr := range prs {
-		prState := userPrState.Get(pr.URL)
+		prState := userPrState.GetPR(pr.URL)
 		if prState.IsMute {
 			continue
 		}

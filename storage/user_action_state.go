@@ -6,10 +6,15 @@ import (
 )
 
 type UserState struct {
-	PerUrl map[string]PrState
+	PerUrl   map[string]PrState
+	Settings UserSettings
 }
 
-func (s *UserState) Get(url string) PrState {
+type UserSettings struct {
+	ViewMode string
+}
+
+func (s *UserState) GetPR(url string) PrState {
 	if state, ok := s.PerUrl[url]; ok {
 		return state
 	} else {

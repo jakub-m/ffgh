@@ -15,10 +15,10 @@ import (
 
 const nbsp = "\u00A0"
 
-func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserState, queries []config.Query) {
+func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, queries []config.Query) {
 	repoNameMaxLen := getMaxRepoLen(prs)
 	for _, pr := range prs {
-		prState := userPrState.Get(pr.URL)
+		prState := userState.GetPR(pr.URL)
 		flagString := ""
 		flags := storage.GetPrStateFlags(pr, prState)
 		log.Printf("Flags for %s: b%b", pr.URL, flags)
@@ -83,7 +83,7 @@ func FprintShowPullRequest(out io.Writer, prUrl string, prs []gh.PullRequest, us
 		// no such pr
 		return
 	}
-	prState := userPrState.Get(pr.URL)
+	prState := userPrState.GetPR(pr.URL)
 	note := ""
 	if prState.Note != "" {
 		note = color.YellowString("[" + prState.Note + "]")

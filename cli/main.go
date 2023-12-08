@@ -137,7 +137,7 @@ func runCommandSync(config config.Config, storage storage.Storage) error {
 
 func runCommandFzf(config config.Config, storage storage.Storage) error {
 	out := os.Stdout
-	prs, userPrState, err := loadState(storage)
+	prs, userState, err := loadState(storage)
 	if err != nil {
 		return fmt.Errorf("storage failed: %w", err)
 	}
@@ -146,7 +146,7 @@ func runCommandFzf(config config.Config, storage storage.Storage) error {
 	} else {
 		fmt.Fprintf(out, "Not synced\n")
 	}
-	fzf.FprintPullRequests(out, prs, userPrState, config.Queries)
+	fzf.FprintPullRequests(out, prs, userState, config.Queries)
 	return nil
 }
 
@@ -225,14 +225,16 @@ func runCommandAddNote(storage storage.Storage) error {
 }
 
 func runCommandCycleView(storage storage.Storage) error {
-	//s, err := storage.GetUserSettings()
-	//if err != nil {
-	//	return fmt.Errorf("error when running cycle view: %w", err)
-	//}
-	//s.ViewMode = fzf.CycleViewMode(s.ViewMode)
-	//if err = storage.SetUserSettings(s); err != nil {
-	//	return fmt.Errorf("error when running cycle view: %w", err)
-	//}
+	s, err := storage.GetUserState()
+	if err != nil {
+		return fmt.Errorf("error when running cycle view: %w", err)
+	}
+	viewMode := s.Settings.ViewMode
+	s.Settings.ViewMode = fzf.CycleViewMode(viewMode)
+	log.Printf("Turn view mode %s to %s", viewMode, s.Settings.ViewMode)
+	if err = storage.WriteUserState(s); err != nil {
+		return fmt.Errorf("error when running cycle view: %w", err)
+	}
 	return nil
 }
 

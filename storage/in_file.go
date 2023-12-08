@@ -46,7 +46,7 @@ func (s *FileStorage) MarkUrlAsOpened(url string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("error while reading user state: %w", err)
 	}
-	prState := userPrState.Get(url)
+	prState := userPrState.GetPR(url)
 	if prState.OpenedAt != nil && *prState.OpenedAt == pr.UpdatedAt && prState.LastCommentCount == pr.CommentsCount {
 		log.Printf("PR state up to date, not marking it as opened")
 		return false, nil
@@ -66,7 +66,7 @@ func (s *FileStorage) MarkUrlAsMuted(url string) error {
 	if err != nil {
 		return fmt.Errorf("error while reading user state: %w", err)
 	}
-	prState := userPrState.Get(url)
+	prState := userPrState.GetPR(url)
 	// If already read, then change mute state
 	prState.IsMute = !prState.IsMute
 	log.Printf("Change mute state to %t %s", prState.IsMute, url)
@@ -94,7 +94,7 @@ func (s *FileStorage) AddNote(url, note string) error {
 	if err != nil {
 		return fmt.Errorf("error when adding note: %w", err)
 	}
-	prState := userPrState.Get(url)
+	prState := userPrState.GetPR(url)
 	prState.Note = note
 	userPrState.Set(url, prState)
 	return s.writeUserState(userPrState)
@@ -140,6 +140,10 @@ func (s *FileStorage) readUserState() (*UserState, error) {
 		return nil, fmt.Errorf("error while unmarshalling file %s: %w", s.UserStatePath, err)
 	}
 	return &state, nil
+}
+
+func (s *FileStorage) WriteUserState(state *UserState) error {
+	return s.writeUserState(state)
 }
 
 func (s *FileStorage) writeUserState(state *UserState) error {

@@ -19,5 +19,5 @@ func CycleViewMode(m string) string {
 			return viewModes[k]
 		}
 	}
-	return m
+	return viewModes[1]
 }
