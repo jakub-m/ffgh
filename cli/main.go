@@ -141,11 +141,14 @@ func runCommandFzf(config config.Config, storage storage.Storage) error {
 	if err != nil {
 		return fmt.Errorf("storage failed: %w", err)
 	}
+	// The X is printed because all lines are displayed 2nd element.
+	syncStr := ""
 	if t, ok := storage.GetSyncTime(); ok {
-		fmt.Fprintf(out, "Last synced %s ago\n", time.Since(t).Round(time.Second))
+		syncStr = fmt.Sprintf("X synced %s ago", time.Since(t).Round(time.Second))
 	} else {
-		fmt.Fprintf(out, "Not synced\n")
+		syncStr = "X not synced"
 	}
+	fmt.Fprintf(out, "%s | %s\n", syncStr, userState.Settings.ViewMode)
 	fzf.FprintPullRequests(out, prs, userState, config.Queries)
 	return nil
 }
