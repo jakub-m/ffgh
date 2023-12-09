@@ -42,15 +42,6 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 	for i, queryName := range config.DisplayOrder {
 		displayPriority[queryName] = i
 	}
-	if mode := userState.Settings.ViewMode; mode == ViewModeMuteTop {
-		newPrs := append([]gh.PullRequest{}, useNotMuted(prs)...)
-		newPrs = append(newPrs, useMuted(prs)...)
-		prs = newPrs
-
-	} else if mode == ViewModeHideMute {
-		prs = useNotMuted(prs)
-	}
-
 	slices.SortStableFunc(prs, func(a, b gh.PullRequest) int {
 		return cmp.Compare(a.Number, b.Number)
 	})
@@ -62,6 +53,14 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 	slices.SortStableFunc(prs, func(a, b gh.PullRequest) int {
 		return cmp.Compare(displayPriority[a.Meta.Label], displayPriority[b.Meta.Label])
 	})
+
+	if mode := userState.Settings.ViewMode; mode == ViewModeMuteTop {
+		newPrs := append([]gh.PullRequest{}, useNotMuted(prs)...)
+		prs = append(newPrs, useMuted(prs)...)
+
+	} else if mode == ViewModeHideMute {
+		prs = useNotMuted(prs)
+	}
 
 	repoNameMaxLen := getMaxRepoLen(prs)
 	for _, pr := range prs {
