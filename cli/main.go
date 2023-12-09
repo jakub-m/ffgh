@@ -149,7 +149,7 @@ func runCommandFzf(config config.Config, storage storage.Storage) error {
 		syncStr = "X not synced"
 	}
 	fmt.Fprintf(out, "%s | %s\n", syncStr, userState.Settings.ViewMode)
-	fzf.FprintPullRequests(out, prs, userState, config.Queries)
+	fzf.FprintPullRequests(out, prs, userState, config)
 	return nil
 }
 

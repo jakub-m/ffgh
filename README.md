@@ -51,6 +51,8 @@ You can define a config with GitHub queries. Run ffzf -h to see the default conf
 if you want to show certain PR as "team PR" if you are part of the team, since the same PR will show up in the query
 for the team and the query for you as an assignee.
 
+`display_order` - it is used to define which queries are displayed first.
+
 # Troubleshooting
 
 Q: My PRs are not visible

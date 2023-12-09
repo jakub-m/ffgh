@@ -1,12 +1,14 @@
 package fzf
 
 import (
+	"cmp"
 	"ffgh/config"
 	"ffgh/gh"
 	"ffgh/storage"
 	"fmt"
 	"io"
 	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -15,7 +17,7 @@ import (
 
 const nbsp = "\u00A0"
 
-func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, queries []config.Query) {
+func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, config config.Config) {
 	useMuted := func(prs []gh.PullRequest) []gh.PullRequest {
 		filtered := []gh.PullRequest{}
 		for _, pr := range prs {
@@ -36,6 +38,10 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 		return filtered
 	}
 
+	displayPriority := make(map[string]int)
+	for i, queryName := range config.DisplayOrder {
+		displayPriority[queryName] = i
+	}
 	if mode := userState.Settings.ViewMode; mode == ViewModeMuteTop {
 		newPrs := append([]gh.PullRequest{}, useNotMuted(prs)...)
 		newPrs = append(newPrs, useMuted(prs)...)
@@ -44,8 +50,20 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 	} else if mode == ViewModeHideMute {
 		prs = useNotMuted(prs)
 	}
-	repoNameMaxLen := getMaxRepoLen(prs)
 
+	slices.SortStableFunc(prs, func(a, b gh.PullRequest) int {
+		return cmp.Compare(a.Number, b.Number)
+	})
+
+	slices.SortStableFunc(prs, func(a, b gh.PullRequest) int {
+		return cmp.Compare(a.Repository.Name, b.Repository.Name)
+	})
+
+	slices.SortStableFunc(prs, func(a, b gh.PullRequest) int {
+		return cmp.Compare(displayPriority[a.Meta.Label], displayPriority[b.Meta.Label])
+	})
+
+	repoNameMaxLen := getMaxRepoLen(prs)
 	for _, pr := range prs {
 		prState := userState.GetPR(pr.URL)
 		flagString := ""
@@ -80,7 +98,7 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 		}
 
 		shortLabel := " "
-		for _, q := range queries {
+		for _, q := range config.Queries {
 			if q.QueryName == pr.Meta.Label {
 				shortLabel = q.ShortName
 			}

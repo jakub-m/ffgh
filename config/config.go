@@ -48,6 +48,12 @@ attribution_order:
   - "Author"
   - "Mentions"
   - "ReviewRequested"
+# Display order is an optional ordering of which queryies should be displayed first.
+display_order:
+  - "Mentions"
+  - "ReviewRequested"
+  - "Assignee"
+  - "Author"
 `
 
 func GetDefaultConfig() Config {
