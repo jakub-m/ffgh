@@ -154,7 +154,7 @@ func runCommandFzf(config config.Config, storage storage.Storage) error {
 }
 
 func runCommandShowCompactSummary(storage storage.Storage) error {
-	prs, userPrState, err := loadState(storage)
+	prs, userState, err := loadState(storage)
 	if err != nil {
 		return fmt.Errorf("storage failed: %w", err)
 	}
@@ -162,7 +162,7 @@ func runCommandShowCompactSummary(storage storage.Storage) error {
 	if syncTime, ok := storage.GetSyncTime(); !ok || syncTime.Before(outOfSyncTime) {
 		fmt.Printf("GH err!")
 	} else {
-		xbar.FprintCompactSummary(os.Stdout, prs, userPrState)
+		xbar.FprintCompactSummary(os.Stdout, prs, userState)
 	}
 	return nil
 }
@@ -172,11 +172,11 @@ func runCommandShowPr(storage storage.Storage) error {
 		return fmt.Errorf("expected url to identify pr")
 	}
 	prUrl := flag.Args()[1]
-	prs, userPrState, err := loadState(storage)
+	prs, userState, err := loadState(storage)
 	if err != nil {
 		return fmt.Errorf("storage failed: %w", err)
 	}
-	fzf.FprintShowPullRequest(os.Stdout, prUrl, prs, userPrState)
+	fzf.FprintShowPullRequest(os.Stdout, prUrl, prs, userState)
 	return nil
 }
 
@@ -246,11 +246,11 @@ func loadState(storage storage.Storage) ([]gh.PullRequest, *storage.UserState, e
 	if err != nil {
 		return prs, nil, err
 	}
-	userPrState, err := storage.GetUserState()
+	userState, err := storage.GetUserState()
 	if err != nil {
 		return prs, nil, err
 	}
-	return prs, userPrState, nil
+	return prs, userState, nil
 }
 
 func getDefaultStateDir() string {

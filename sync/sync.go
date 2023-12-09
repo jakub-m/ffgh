@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -53,29 +54,58 @@ func (s *Synchronizer) RunBlocking(config config.Config) error {
 	}
 }
 
+// RunOnce synchronizes state of the GH PRs once. The same PR (same URL) can appear in many queries. The method
+// returns only a single PR and uses the attribution order from config to figure which query should it attributre
+// the PR to.
 func (s *Synchronizer) RunOnce(config config.Config) error {
 	log.Printf("Run gh search")
-	allPrs := []gh.PullRequest{}
-	urlsVisited := make(map[string]bool)
+	// All the PRs with duplicates from different queries.
+	queriedPrs := make(map[string][]gh.PullRequest)
 	for _, q := range config.Queries {
 		prs, err := getPrs(q.GitHubArg, q.QueryName)
 		if err != nil {
 			return fmt.Errorf("error while querying PRs %s: %w", q.GitHubArg, err)
 		}
 		for _, pr := range prs {
-			if urlsVisited[pr.URL] {
-				continue
+			if queriedPrs[pr.URL] == nil {
+				queriedPrs[pr.URL] = []gh.PullRequest{}
 			}
-			urlsVisited[pr.URL] = true
-			allPrs = append(allPrs, pr)
+			queriedPrs[pr.URL] = append(queriedPrs[pr.URL], pr)
 		}
 	}
-	if err := s.Storage.ResetPullRequests(allPrs); err != nil {
+	log.Printf("Got %d PRs (with duplicates)", len(queriedPrs))
+	log.Printf("Use attribution order: %s", strings.Join(config.AttributionOrder, ", "))
+	attributionPriority := make(map[string]int)
+	for i, queryName := range config.AttributionOrder {
+		attributionPriority[queryName] = i
+	}
+	// PRs that are not duplicated anymore, with attribution w.r.t. attribution order.
+	uniquePrs := []gh.PullRequest{}
+	for _, prs := range queriedPrs {
+		if len(prs) == 1 {
+			uniquePrs = append(uniquePrs, prs[0])
+		} else {
+			selected := selectPrWrtAttributionPriority(prs, attributionPriority)
+			uniquePrs = append(uniquePrs, selected)
+		}
+	}
+
+	if err := s.Storage.ResetPullRequests(uniquePrs); err != nil {
 		return fmt.Errorf("error while storing PRs: %w", err)
 	}
 
-	log.Printf("Updated %d pull requests", len(allPrs))
+	log.Printf("Updated %d pull requests", len(uniquePrs))
 	return nil
+}
+
+func selectPrWrtAttributionPriority(prs []gh.PullRequest, attributionPriority map[string]int) gh.PullRequest {
+	selected := prs[0]
+	for _, pr := range prs {
+		if attributionPriority[pr.Meta.Label] < attributionPriority[selected.Meta.Label] {
+			selected = pr
+		}
+	}
+	return selected
 }
 
 func getPrs(query, metaLabel string) ([]gh.PullRequest, error) {

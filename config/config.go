@@ -10,6 +10,11 @@ import (
 
 type Config struct {
 	Queries []Query `yaml:"queries"`
+	// DisplayOrder specifies what entries come after which entries.
+	DisplayOrder []string `yaml:"display_order"`
+	// AttributionOrder says which query to attribute the PR to, when the same PR appears in more than
+	// one query.
+	AttributionOrder []string `yaml:"attribution_order"`
 }
 
 type Query struct {
@@ -17,7 +22,7 @@ type Query struct {
 	GitHubArg string `yaml:"github_arg"`
 	// QueryName is a long of the query that shows in the description.
 	QueryName string `yaml:"query_name"`
-	//  ShortName is a single letter identifier of the query.
+	// ShortName is a single letter identifier of the query.
 	ShortName string `yaml:"short_name"`
 }
 
@@ -35,6 +40,14 @@ queries:
   - github_arg: "--review-requested=@me"
     query_name: "ReviewRequested"
     short_name: "r"
+# Attribution order is optional ordering of 'query_name' that are assigned to the PRs that
+# appear in more than one query. By default, the order of 'queries' is used. A missing query name
+# takes top priority.
+attribution_order:
+  - "Assignee"
+  - "Author"
+  - "Mentions"
+  - "ReviewRequested"
 `
 
 func GetDefaultConfig() Config {
