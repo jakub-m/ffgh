@@ -22,7 +22,7 @@ import (
 
 const (
 	commandAddNote            = "add-note"
-	commandCycleView          = "cycle-view"
+	commandCycleView          = "cycle-view-mode"
 	commandFzf                = "fzf"
 	commandShowCompactSummary = "show-compact-summary"
 	commandMarkOpen           = "mark-open"

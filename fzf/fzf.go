@@ -57,7 +57,6 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 	if mode := userState.Settings.ViewMode; mode == ViewModeMuteTop {
 		newPrs := append([]gh.PullRequest{}, useNotMuted(prs)...)
 		prs = append(newPrs, useMuted(prs)...)
-
 	} else if mode == ViewModeHideMute {
 		prs = useNotMuted(prs)
 	}
