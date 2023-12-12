@@ -24,6 +24,8 @@ type Query struct {
 	QueryName string `yaml:"query_name"`
 	// ShortName is a single letter identifier of the query.
 	ShortName string `yaml:"short_name"`
+	// Mute says if the PRs should be muted by default.
+	Mute bool `yaml:"mute"`
 }
 
 const DefaultConfigYaml = `
@@ -37,6 +39,7 @@ queries:
   - github_arg: "--mentions=@me"
     query_name: "Mentions"
     short_name: "m"
+    mute: true
   - github_arg: "--review-requested=@me"
     query_name: "ReviewRequested"
     short_name: "r"

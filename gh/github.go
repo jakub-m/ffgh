@@ -32,5 +32,6 @@ type PullRequest struct {
 
 // Meta is metadata attached to PR that is not a part of the GitHub payload.
 type Meta struct {
-	Label string
+	Label       string
+	DefaultMute bool
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"ffgh/config"
 	conf "ffgh/config"
 	"ffgh/fzf"
 	"ffgh/gh"
@@ -51,7 +50,7 @@ func main() {
 		fmt.Printf("Available commands: %s\n", strings.Join(commands, ", "))
 		fmt.Printf("\n")
 		flag.PrintDefaults()
-		fmt.Printf("\nThe default config file is:\n%s", config.DefaultConfigYaml)
+		fmt.Printf("\nThe default config file is:\n%s", conf.DefaultConfigYaml)
 	}
 	if len(os.Args) < 2 {
 		flag.Usage()
@@ -118,7 +117,7 @@ func main() {
 	}
 }
 
-func runCommandSync(config config.Config, storage storage.Storage) error {
+func runCommandSync(config conf.Config, storage storage.Storage) error {
 	once := false
 	fs := flag.NewFlagSet(commandSync, flag.ContinueOnError)
 	fs.BoolVar(&once, "once", once, "run once")
@@ -135,7 +134,7 @@ func runCommandSync(config config.Config, storage storage.Storage) error {
 	return run(config)
 }
 
-func runCommandFzf(config config.Config, storage storage.Storage) error {
+func runCommandFzf(config conf.Config, storage storage.Storage) error {
 	out := os.Stdout
 	prs, userState, err := loadState(storage)
 	if err != nil {

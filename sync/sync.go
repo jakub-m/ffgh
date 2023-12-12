@@ -62,7 +62,7 @@ func (s *Synchronizer) RunOnce(config config.Config) error {
 	// All the PRs with duplicates from different queries.
 	queriedPrs := make(map[string][]gh.PullRequest)
 	for _, q := range config.Queries {
-		prs, err := getPrs(q.GitHubArg, q.QueryName)
+		prs, err := getPrs(q.GitHubArg, q.QueryName, q.Mute)
 		if err != nil {
 			return fmt.Errorf("error while querying PRs %s: %w", q.GitHubArg, err)
 		}
@@ -108,7 +108,7 @@ func selectPrWrtAttributionPriority(prs []gh.PullRequest, attributionPriority ma
 	return selected
 }
 
-func getPrs(query, metaLabel string) ([]gh.PullRequest, error) {
+func getPrs(query, metaLabel string, mute bool) ([]gh.PullRequest, error) {
 	log.Printf("Get PRs for: %s", query)
 	out, err := exec.Command("gh", "search", "prs", "--draft=false", "--state=open", query, "--json", jsonFields).Output()
 	if err != nil {
@@ -121,6 +121,7 @@ func getPrs(query, metaLabel string) ([]gh.PullRequest, error) {
 	}
 	for i, pr := range prs {
 		pr.Meta.Label = metaLabel
+		pr.Meta.DefaultMute = mute
 		prs[i] = pr
 	}
 	return prs, nil

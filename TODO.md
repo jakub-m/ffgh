@@ -3,4 +3,3 @@
 * Do not show the authored new PRs as new, mark them as read automatically.
 * Show help with ctrl-h
 * Optionally open /files url
-* Mute some reviews based on query or regex

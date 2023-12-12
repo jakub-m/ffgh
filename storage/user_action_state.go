@@ -14,13 +14,14 @@ type UserSettings struct {
 	ViewMode string
 }
 
+// GetPR is deprecated.
+//
+// Deprecated: Use direct access instead.
 func (s *UserState) GetPR(url string) PrState {
 	if state, ok := s.PerUrl[url]; ok {
 		return state
 	} else {
-		state := PrState{}
-		s.PerUrl[url] = state
-		return state
+		return PrState{}
 	}
 }
 

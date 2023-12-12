@@ -53,6 +53,8 @@ for the team and the query for you as an assignee.
 
 `display_order` - it is used to define which queries are displayed first.
 
+`mute` - allows marking results of some queries as muted by default (unless explicityly unmuted).
+
 # Troubleshooting
 
 Q: My PRs are not visible

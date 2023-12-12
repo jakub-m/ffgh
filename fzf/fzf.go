@@ -18,10 +18,16 @@ import (
 const nbsp = "\u00A0"
 
 func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, config config.Config) {
+	isMute := func(pr gh.PullRequest) bool {
+		state, ok := userState.PerUrl[pr.URL]
+		isMute := (ok && state.IsMute) || (!ok && pr.Meta.DefaultMute)
+		return isMute
+	}
+
 	useMuted := func(prs []gh.PullRequest) []gh.PullRequest {
 		filtered := []gh.PullRequest{}
 		for _, pr := range prs {
-			if userState.GetPR(pr.URL).IsMute {
+			if isMute(pr) {
 				filtered = append(filtered, pr)
 			}
 		}
@@ -31,7 +37,7 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 	useNotMuted := func(prs []gh.PullRequest) []gh.PullRequest {
 		filtered := []gh.PullRequest{}
 		for _, pr := range prs {
-			if !userState.GetPR(pr.URL).IsMute {
+			if !isMute(pr) {
 				filtered = append(filtered, pr)
 			}
 		}
@@ -67,7 +73,7 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 		flagString := ""
 		flags := storage.GetPrStateFlags(pr, prState)
 		log.Printf("Flags for %s: b%b", pr.URL, flags)
-		mute := prState.IsMute
+		mute := isMute(pr)
 		unmutedOnly := func(c func(string, ...any) string, s string) string {
 			if mute {
 				return s
