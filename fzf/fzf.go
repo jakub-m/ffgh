@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"ffgh/config"
 	"ffgh/gh"
+	"ffgh/ghutil"
 	"ffgh/storage"
 	"fmt"
 	"io"
@@ -19,9 +20,7 @@ const nbsp = "\u00A0"
 
 func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, config config.Config) {
 	isMute := func(pr gh.PullRequest) bool {
-		state, ok := userState.PerUrl[pr.URL]
-		isMute := (ok && state.IsMute) || (!ok && pr.Meta.DefaultMute)
-		return isMute
+		return ghutil.IsMute(userState, pr)
 	}
 
 	useMuted := func(prs []gh.PullRequest) []gh.PullRequest {

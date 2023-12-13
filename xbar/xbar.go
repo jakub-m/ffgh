@@ -2,20 +2,21 @@ package xbar
 
 import (
 	"ffgh/gh"
+	"ffgh/ghutil"
 	"ffgh/storage"
 	"fmt"
 	"io"
 	"strings"
 )
 
-func FprintCompactSummary(out io.Writer, prs []gh.PullRequest, userPrState *storage.UserState) {
+func FprintCompactSummary(out io.Writer, prs []gh.PullRequest, userState *storage.UserState) {
 	newCount := 0
 	updatedCount := 0
 	commentedCount := 0
 	totalCount := 0
 	for _, pr := range prs {
-		prState := userPrState.GetPR(pr.URL)
-		if prState.IsMute {
+		prState := userState.PerUrl[pr.URL]
+		if ghutil.IsMute(userState, pr) {
 			continue
 		}
 		totalCount++
