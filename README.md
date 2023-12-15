@@ -32,6 +32,7 @@ ffgh **requires** [`fzf`][ref_fzf] and [`gh` CLI][ref_gh].
 * ctrl-r - Mark as read without opening (does not work with multi-select), mute and unmute.
 * ctrl-n - Add note.
 * ctrl-f - Cycle view mode (show all, mute to the top, hide muted).
+* ctrl-o - Open without exiting (does not work with multi-select).
 * tab - Multi-select.
 
 

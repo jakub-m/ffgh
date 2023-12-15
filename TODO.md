@@ -3,3 +3,5 @@
 * Do not show the authored new PRs as new, mark them as read automatically.
 * Show help with ctrl-h
 * Optionally open /files url
+* Canned strings
+* BUG - opening default-mute causes unmute. Maybe solve it by adding state for each new file and default mute there?
