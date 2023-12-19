@@ -89,7 +89,7 @@ func (s *FileStorage) getPrForUrl(url string) (gh.PullRequest, error) {
 }
 
 func (s *FileStorage) AddNote(url, note string) error {
-	log.Printf("Add note to url %s: %s", url, note)
+	log.Printf("Add note to URL %s: %s", url, note)
 	userPrState, err := s.readUserState()
 	if err != nil {
 		return fmt.Errorf("error when adding note: %w", err)

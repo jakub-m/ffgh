@@ -6,6 +6,7 @@ import (
 	"ffgh/gh"
 	"ffgh/storage"
 	"ffgh/sync"
+	"ffgh/util"
 	"ffgh/xbar"
 	"flag"
 	"fmt"
@@ -21,6 +22,7 @@ import (
 
 const (
 	commandAddNote            = "add-note"
+	commandCycleNote          = "cycle-note"
 	commandCycleView          = "cycle-view-mode"
 	commandFzf                = "fzf"
 	commandShowCompactSummary = "show-compact-summary"
@@ -37,6 +39,7 @@ const (
 func main() {
 	commands := []string{
 		commandAddNote,
+		commandCycleNote,
 		commandCycleView,
 		commandFzf,
 		commandMarkMute,
@@ -47,8 +50,9 @@ func main() {
 	}
 	flag.Usage = func() {
 		fmt.Printf("Utility to synchronize and display state of GitHub PRs.\n")
-		fmt.Printf("Available commands: %s\n", strings.Join(commands, ", "))
+		fmt.Printf("Available commands: \n  - %s\n", strings.Join(commands, "\n  - "))
 		fmt.Printf("\n")
+		fmt.Printf("Other options:\n")
 		flag.PrintDefaults()
 		fmt.Printf("\nThe default config file is:\n%s", conf.DefaultConfigYaml)
 	}
@@ -109,6 +113,8 @@ func main() {
 			return runCommandAddNote(storage)
 		} else if command == commandCycleView {
 			return runCommandCycleView(storage)
+		} else if command == commandCycleNote {
+			return runCommandCycleNote(config, storage)
 		} else {
 			return fmt.Errorf("unknown command: %s", command)
 		}
@@ -214,7 +220,7 @@ func runCommandMarkMute(storage storage.Storage) error {
 
 func runCommandAddNote(storage storage.Storage) error {
 	if len(flag.Args()) < 3 {
-		return fmt.Errorf("expected url to mark and file with note")
+		return fmt.Errorf("expected URL to mark and file with note")
 	}
 	url := flag.Args()[1]
 	fileWithNote := flag.Args()[2]
@@ -238,6 +244,31 @@ func runCommandCycleView(storage storage.Storage) error {
 		return fmt.Errorf("error when running cycle view: %w", err)
 	}
 	return nil
+}
+
+func runCommandCycleNote(config conf.Config, storage storage.Storage) error {
+	if len(flag.Args()) < 2 {
+		return fmt.Errorf("expected URL to change note for")
+	}
+	if len(config.Annotations) == 0 {
+		return fmt.Errorf("no annotations set in config")
+	}
+	url := flag.Args()[1]
+	log.Printf("Cycle note for url %s", url)
+	s, err := storage.GetUserState()
+	if err != nil {
+		return fmt.Errorf("error when running cycle view: %w", err)
+	}
+
+	currNote := ""
+	if prState, ok := s.PerUrl[url]; ok {
+		currNote = prState.Note
+	}
+	annotations := append([]string{}, config.Annotations...)
+	annotations = append(annotations, "") // Add empty note at the end of the cycle
+	newNote := util.Cycle(currNote, annotations)
+	log.Printf("Old note '%s', new note '%s'", currNote, newNote)
+	return storage.AddNote(url, newNote)
 }
 
 func loadState(storage storage.Storage) ([]gh.PullRequest, *storage.UserState, error) {

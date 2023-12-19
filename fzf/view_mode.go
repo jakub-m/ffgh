@@ -1,5 +1,7 @@
 package fzf
 
+import "ffgh/util"
+
 const (
 	ViewModeRegular  = "regular"
 	ViewModeMuteTop  = "mute-top"
@@ -13,11 +15,5 @@ var viewModes = []string{
 }
 
 func CycleViewMode(m string) string {
-	for i, v := range viewModes {
-		if v == m {
-			k := (i + 1) % len(viewModes)
-			return viewModes[k]
-		}
-	}
-	return viewModes[1]
+	return util.Cycle(m, viewModes)
 }

@@ -30,7 +30,8 @@ ffgh **requires** [`fzf`][ref_fzf] and [`gh` CLI][ref_gh].
 
 * enter - Open all the selected PRs in the browser.
 * ctrl-r - Mark as read without opening (does not work with multi-select), mute and unmute.
-* ctrl-n - Add note.
+* ctrl-n - Add a custom note.
+* ctrl-a - Annotate with a standard annotation (configurable).
 * ctrl-f - Cycle view mode (show all, mute to the top, hide muted).
 * ctrl-o - Open without exiting (does not work with multi-select).
 * tab - Multi-select.

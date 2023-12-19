@@ -15,6 +15,8 @@ type Config struct {
 	// AttributionOrder says which query to attribute the PR to, when the same PR appears in more than
 	// one query.
 	AttributionOrder []string `yaml:"attribution_order"`
+	// Annotations are standard notest that the user can easily cycle through instead of adding the note by hand.
+	Annotations []string `yaml:"annotations"`
 }
 
 type Query struct {
@@ -57,6 +59,8 @@ display_order:
   - "ReviewRequested"
   - "Assignee"
   - "Author"
+annotations:
+  - Approved
 `
 
 func GetDefaultConfig() Config {
