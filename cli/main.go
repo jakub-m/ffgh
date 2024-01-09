@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -141,6 +142,13 @@ func runCommandSync(config conf.Config, storage storage.Storage) error {
 }
 
 func runCommandFzf(config conf.Config, storage storage.Storage) error {
+	vname := "TERMINAL_WIDTH"
+	terminalWidthEnv := os.Getenv(vname)
+	terminalWidth, err := strconv.ParseInt(terminalWidthEnv, 10, 64)
+	if err != nil {
+		log.Printf("Could not figure terminal width from env variable %s: %s", vname, err)
+		terminalWidth = 120
+	}
 	out := os.Stdout
 	prs, userState, err := loadState(storage)
 	if err != nil {
@@ -154,7 +162,7 @@ func runCommandFzf(config conf.Config, storage storage.Storage) error {
 		syncStr = "X not synced"
 	}
 	fmt.Fprintf(out, "%s | %s\n", syncStr, userState.Settings.ViewMode)
-	fzf.FprintPullRequests(out, prs, userState, config)
+	fzf.FprintPullRequests(out, int(terminalWidth), prs, userState, config)
 	return nil
 }
 

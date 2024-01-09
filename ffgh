@@ -13,6 +13,8 @@ function cleanup {
 }
 trap cleanup EXIT
 
+export TERMINAL_WIDTH=$(tput cols)
+
 fzf \
 	--ansi \
 	--multi \
@@ -20,7 +22,7 @@ fzf \
 	--preview-window=top:wrap \
 	--preview "$bin show-pr {1}" \
 	--header-lines=1 \
-	--bind "start:reload:($bin fzf)"\
+	--bind "start:reload:($bin -v fzf)"\
 	--bind "ctrl-r:reload($bin mark-open -e {1} || $bin mark-mute {1} && $bin fzf)+down" \
 	--bind "ctrl-v:reload($bin cycle-view-mode && $bin fzf)" \
 	--bind "ctrl-o:reload($bin mark-open {1} && open {1} && $bin fzf)+down" \

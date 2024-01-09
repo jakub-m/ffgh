@@ -12,13 +12,16 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
 )
 
 const nbsp = "\u00A0"
 
-func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.UserState, config config.Config) {
+// FprintPullRequests prints the list of pull requests, one per line, in a format suitable for consumption by `fzf`.
+func FprintPullRequests(out io.Writer, terminalWidth int, prs []gh.PullRequest, userState *storage.UserState, config config.Config) {
+	log.Printf("Use terminal width of %d", terminalWidth)
 	isMute := func(pr gh.PullRequest) bool {
 		return ghutil.IsMute(userState, pr)
 	}
@@ -68,7 +71,7 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 
 	repoNameMaxLen := getMaxRepoLen(prs)
 	for _, pr := range prs {
-		prState := userState.GetPR(pr.URL)
+		prState := userState.PerUrl[pr.URL]
 		flagString := ""
 		flags := storage.GetPrStateFlags(pr, prState)
 		log.Printf("Flags for %s: b%b", pr.URL, flags)
@@ -96,8 +99,10 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 			flagString += nbsp
 		}
 		title := pr.Title
+		note := ""
 		if prState.Note != "" {
-			title = title + unmutedOnly(color.CyanString, " ["+prState.Note+"]")
+			//title = title + unmutedOnly(color.CyanString, " ["+prState.Note+"]")
+			note = unmutedOnly(color.CyanString, " ["+prState.Note+"]")
 		}
 
 		shortLabel := " "
@@ -106,14 +111,16 @@ func FprintPullRequests(out io.Writer, prs []gh.PullRequest, userState *storage.
 				shortLabel = q.ShortName
 			}
 		}
-		outputParts := []string{
+		leftParts := []string{
 			flagString,
 			toLeftS(pr.Repository.Name, repoNameMaxLen),
 			shortLabel,
 			fmt.Sprintf("#%-5d", pr.Number),
 			title,
 		}
-		line := fmt.Sprintf("%s\t%s", pr.URL, strings.Join(outputParts, " "))
+		lineLeft := strings.Join(leftParts, " ")
+		lineRight := note
+		line := fmt.Sprintf("%s\t%s", pr.URL, joinStringsCapWidth(terminalWidth, lineLeft, lineRight))
 		if mute {
 			line = color.HiBlackString(line)
 		}
@@ -133,7 +140,7 @@ func FprintShowPullRequest(out io.Writer, prUrl string, prs []gh.PullRequest, us
 		// no such pr
 		return
 	}
-	prState := userPrState.GetPR(pr.URL)
+	prState := userPrState.PerUrl[pr.URL]
 	note := ""
 	if prState.Note != "" {
 		note = color.YellowString("[" + prState.Note + "]")
@@ -185,4 +192,35 @@ func getMaxRepoLen(prs []gh.PullRequest) int {
 func toLeftS(s string, w int) string {
 	f := fmt.Sprintf("%%-%ds", w) // like %-10s
 	return fmt.Sprintf(f, s)
+}
+
+const elypsis = '…'
+
+func joinStringsCapWidth(width int, left, right string) string {
+	leftSize := utf8.RuneCountInString(left)
+	rightSize := utf8.RuneCountInString(right)
+	if leftSize+rightSize <= width {
+		return left + right
+	}
+	buf := make([]rune, width)
+	i := 0
+	for _, r := range left {
+		if i >= len(buf) {
+			break
+		}
+		buf[i] = r
+		i++
+	}
+	i = len(buf) - rightSize
+	if j := (i - 1); j >= 0 {
+		buf[j] = elypsis
+	}
+	for _, r := range right {
+		if i >= len(buf) {
+			break
+		}
+		buf[i] = r
+		i++
+	}
+	return string(buf)
 }
