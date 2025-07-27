@@ -1,3 +1,5 @@
+**This tool was rewritten to Rust, see [ffgh-rs](https://github.com/jakub-m/ffgh-rs/tree/main)**
+
 # ffgh = fzf + gh
 
 Quick access to GitHub PRs from terminal.
